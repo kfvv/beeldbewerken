@@ -4,6 +4,8 @@ from matplotlib import cm
 from scipy.ndimage import convolve, convolve1d
 from scipy.misc import imread
 from pylab import subplot, imshow
+import time
+from mpl_toolkits.mplot3d import axes3d
 
 
 def analytical_local_structure():
@@ -34,13 +36,13 @@ def analytical_local_structure():
 
 
 def gauss(s):
-    size = s * 3
+    size = s * 3.0
     x = np.arange(-size, size + 1)
     y = np.arange(-size, size + 1)
 
     X, Y = np.meshgrid(x, y)
 
-    G = np.exp(-(X**2 + Y**2) / (2 * s**2))
+    G = np.exp(-(X**2 + Y**2) / (2.0 * s**2))
     new_G = G / G.sum()
 
     return new_G
@@ -60,18 +62,33 @@ def gauss_convolution():
 
 
 def gauss1(s):
-    size = s * 3
+    size = s * 3.0
     x = np.arange(-size, size + 1)
 
-    G = np.exp(-(x**2) / (2 * s**2))
+    G = np.exp(-(x**2) / (2.0 * s**2))
     new_G = G / G.sum()
 
     return new_G
 
 
+def plot_gauss(s):
+    size = s * 3.0
+    x = np.arange(-size, size + 1)
+    X, Y = np.meshgrid(x, x)
+
+    Z = gauss(s)
+
+    F = plt.figure()
+    ax = F.add_subplot(111, projection='3d')
+
+    ax.plot_wireframe(X, Y, Z)
+
+    plt.show()
+
+
 def separable_gauss_convolution():
-    F = imread('cameraman.jpg', flatten=True)
-    W1 = gauss1(10)
+    F = imread('cameraman.jpg', flatten=True).astype(np.float)
+    W1 = gauss1(3)
 
     H = convolve1d(F, W1, axis=0, mode='nearest')
     G = convolve1d(H, W1, axis=1, mode='nearest')
@@ -81,6 +98,15 @@ def separable_gauss_convolution():
     subplot(1, 2, 2)
     imshow(G, cmap=cm.gray)
     plt.show()
+
+    for s in [1, 2, 3, 5, 7, 9, 11, 15, 19]:
+        now = time.time()
+        W1 = gauss1(s)
+        H = convolve1d(F, W1, axis=0, mode='nearest')
+        G = convolve1d(H, W1, axis=1, mode='nearest')
+        print('s={:2d}: {:.3f} ms'.format(s, (time.time() - now) * 1000))
+
+    plot_gauss(3)
 
 
 def gauss_derivatives():
