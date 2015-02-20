@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
-from scipy.ndimage import convolve
+from scipy.ndimage import convolve, convolve1d
 from scipy.misc import imread
 from pylab import subplot, imshow
 
@@ -59,12 +59,28 @@ def gauss_convolution():
     plt.show()
 
 
-def gauss1():
-    pass
+def gauss1(s):
+    size = s * 3
+    x = np.arange(-size, size + 1)
+
+    G = np.exp(-(x**2) / (2 * s**2))
+    new_G = G / G.sum()
+
+    return new_G
 
 
 def separable_gauss_convolution():
-    pass
+    F = imread('cameraman.jpg', flatten=True)
+    W1 = gauss1(10)
+
+    H = convolve1d(F, W1, axis=0, mode='nearest')
+    G = convolve1d(H, W1, axis=1, mode='nearest')
+
+    subplot(1, 2, 1)
+    imshow(F, cmap=cm.gray)
+    subplot(1, 2, 2)
+    imshow(G, cmap=cm.gray)
+    plt.show()
 
 
 def gauss_derivatives():
@@ -81,4 +97,5 @@ def canny_edge_detector():
 
 if __name__ == "__main__":
     # analytical_local_structure()
-    gauss_convolution()
+    # gauss_convolution()
+    separable_gauss_convolution()
