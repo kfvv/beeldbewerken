@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
 from scipy.ndimage import convolve, convolve1d
+from scipy.ndimage.filters import gaussian_filter
 from scipy.misc import imread
 from pylab import subplot, imshow
 import time
@@ -65,10 +66,28 @@ def gauss1(s):
     size = s * 3.0
     x = np.arange(-size, size + 1)
 
-    G = np.exp(-(x**2) / (2.0 * s**2))
+    G = np.exp(-(x ** 2) / (2.0 * s ** 2))
+    # G = (1 / np.sqrt(2 * np.pi)) * np.exp(-(x ** 2) / (2.0 * s ** 2))
     new_G = G / G.sum()
 
     return new_G
+
+
+def gauss1_deriv(s):
+    size = s * 3.0
+    x = np.arange(-size, size + 1)
+    G = (-x * np.exp(-x ** 2 / (2 * s ** 2)) / (s ** 2)) * (1 / (np.sqrt(2 * np.pi) * s))
+
+    return G
+
+
+def gauss1_second_deriv(s):
+    size = s * 3.0
+    x = np.arange(-size, size + 1)
+
+    G = (((x ** 2) - (s ** 2)) * np.exp(-((x ** 2)/(2*(s ** 2))))/(s ** 4)) * (1 / (np.sqrt(2 * np.pi) * s))
+
+    return G
 
 
 def plot_gauss(s):
@@ -109,8 +128,62 @@ def separable_gauss_convolution():
     plot_gauss(3)
 
 
-def gauss_derivatives():
-    pass
+def gD(F, s, iorder, jorder):
+    if iorder == 0:
+        F = convolve1d(F, gauss1(s), axis=0, mode='nearest')
+    if iorder == 1:
+        F = convolve1d(F, gauss1_deriv(s), axis=0, mode='nearest')
+    if iorder == 2:
+        F = convolve1d(F, gauss1_second_deriv(s), axis=0, mode='nearest')
+    if jorder == 0:
+        F = convolve1d(F, gauss1(s), axis=0, mode='nearest')
+    if jorder == 1:
+        F = convolve1d(F, gauss1_deriv(s), axis=1, mode='nearest')
+    if jorder == 2:
+        F = convolve1d(F, gauss1_second_deriv(s), axis=1, mode='nearest')
+    return F
+
+
+def gaussian_derivatives():
+    F = imread('cameraman.jpg', flatten=True)
+
+    G = gD(F, 3, 0, 0)
+    plt.subplot(1, 9, 1)
+    imshow(F, cmap=cm.gray)
+
+    G = gD(F, 3, 0, 1)
+    plt.subplot(1, 9, 2)
+    imshow(G, cmap=cm.gray)
+
+    G = gD(F, 3, 0, 2)
+    plt.subplot(1, 9, 3)
+    imshow(G, cmap=cm.gray)
+
+    G = gD(F, 3, 1, 0)
+    plt.subplot(1, 9, 4)
+    imshow(G, cmap=cm.gray)
+
+    G = gD(F, 3, 2, 0)
+    plt.subplot(1, 9, 5)
+    imshow(G, cmap=cm.gray)
+
+    G = gD(F, 3, 1, 1)
+    plt.subplot(1, 9, 6)
+    imshow(G, cmap=cm.gray)
+
+    G = gD(F, 3, 1, 2)
+    plt.subplot(1, 9, 7)
+    imshow(G, cmap=cm.gray)
+
+    G = gD(F, 3, 2, 1)
+    plt.subplot(1, 9, 8)
+    imshow(G, cmap=cm.gray)
+
+    G = gD(F, 3, 2, 2)
+    plt.subplot(1, 9, 9)
+    imshow(G, cmap=cm.gray)
+
+    plt.show()
 
 
 def comparison():
@@ -124,4 +197,5 @@ def canny_edge_detector():
 if __name__ == "__main__":
     # analytical_local_structure()
     # gauss_convolution()
-    separable_gauss_convolution()
+    # separable_gauss_convolution()
+    gaussian_derivatives()
