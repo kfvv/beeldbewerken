@@ -2,7 +2,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
 from scipy.ndimage import convolve, convolve1d
-from scipy.ndimage.filters import gaussian_filter
 from scipy.misc import imread
 from pylab import subplot, imshow
 import time
@@ -61,13 +60,21 @@ def gauss_convolution():
     imshow(G, cmap=cm.gray)
     plt.show()
 
+    for s in [1, 2, 3, 5, 7, 9, 11, 15, 19]:
+        now = time.time()
+        W1 = gauss1(s)
+        H = convolve1d(F, W1, axis=0, mode='nearest')
+        G = convolve1d(H, W1, axis=1, mode='nearest')
+        print('s={:2d}: {:.3f} ms'.format(s, (time.time() - now) * 1000))
+
+    plot_gauss(3)
+
 
 def gauss1(s):
     size = s * 3.0
     x = np.arange(-size, size + 1)
 
     G = np.exp(-(x ** 2) / (2.0 * s ** 2))
-    # G = (1 / np.sqrt(2 * np.pi)) * np.exp(-(x ** 2) / (2.0 * s ** 2))
     new_G = G / G.sum()
 
     return new_G
@@ -148,40 +155,46 @@ def gaussian_derivatives():
     F = imread('cameraman.jpg', flatten=True)
 
     G = gD(F, 3, 0, 0)
-    plt.subplot(1, 9, 1)
+    plt.subplot(2, 3, 1)
     imshow(F, cmap=cm.gray)
-
-    G = gD(F, 3, 0, 1)
-    plt.subplot(1, 9, 2)
-    imshow(G, cmap=cm.gray)
-
-    G = gD(F, 3, 0, 2)
-    plt.subplot(1, 9, 3)
-    imshow(G, cmap=cm.gray)
+    plt.title('F')
 
     G = gD(F, 3, 1, 0)
-    plt.subplot(1, 9, 4)
+    plt.subplot(2, 3, 2)
     imshow(G, cmap=cm.gray)
+    plt.title('Fx')
+
+    G = gD(F, 3, 0, 1)
+    plt.subplot(2, 3, 3)
+    imshow(G, cmap=cm.gray)
+    plt.title('Fy')
 
     G = gD(F, 3, 2, 0)
-    plt.subplot(1, 9, 5)
+    plt.subplot(2, 3, 4)
     imshow(G, cmap=cm.gray)
+    plt.title('Fxx')
+
+    G = gD(F, 3, 0, 2)
+    plt.subplot(2, 3, 5)
+    imshow(G, cmap=cm.gray)
+    plt.title('Fyy')
 
     G = gD(F, 3, 1, 1)
-    plt.subplot(1, 9, 6)
+    plt.subplot(2, 3, 6)
     imshow(G, cmap=cm.gray)
+    plt.title('Fxy')
 
-    G = gD(F, 3, 1, 2)
-    plt.subplot(1, 9, 7)
-    imshow(G, cmap=cm.gray)
+    # G = gD(F, 3, 1, 2)
+    # plt.subplot(3, 3, 7)
+    # imshow(G, cmap=cm.gray)
 
-    G = gD(F, 3, 2, 1)
-    plt.subplot(1, 9, 8)
-    imshow(G, cmap=cm.gray)
+    # G = gD(F, 3, 2, 1)
+    # plt.subplot(3, 3, 8)
+    # imshow(G, cmap=cm.gray)
 
-    G = gD(F, 3, 2, 2)
-    plt.subplot(1, 9, 9)
-    imshow(G, cmap=cm.gray)
+    # G = gD(F, 3, 2, 2)
+    # plt.subplot(3, 3, 9)
+    # imshow(G, cmap=cm.gray)
 
     plt.show()
 
@@ -202,33 +215,26 @@ def canny(F, s):
     fw = np.sqrt(fx ** 2 + fy ** 2)
     fww = fx ** 2 * fxx + 2 * fx * fy * fxy + fy ** 2 * fyy
 
-    edges = np.copy(fw)
-
-    def check_edges(x, y):
-        if ((fww[y][x - 1] > 0 and fww[y][x + 1] < 0) or
-            (fww[y][x - 1] < 0 and fww[y][x + 1] > 0) or
-            (fww[y - 1][x] > 0 and fww[y + 1][x] < 0) or
-            (fww[y - 1][x] < 0 and fww[y + 1][x] > 0) or
-            (fww[y - 1][x + 1] > 0 and fww[y + 1][x + 1] < 0) or
-            (fww[y - 1][x + 1] < 0 and fww[y + 1][x + 1] > 0) or
-            (fww[y - 1][x - 1] > 0 and fww[y - 1][x + 1] < 0) or
-            (fww[y - 1][x - 1] < 0 and fww[y - 1][x + 1] > 0) or
-            (fww[y + 1][x - 1] > 0 and fww[y + 1][x + 1] < 0) or
-            (fww[y - 1][x - 1] < 0 and fww[y + 1][x - 1] > 0) or
-            (fww[y - 1][x - 1] < 0 and fww[y + 1][x + 1] > 0)):
-                edges[y][x] = 0
+    edges = np.array(fw)
 
     height, width = F.shape
 
-    for i in range(width - 2):
-        for j in range(height - 2):
-            check_edges(i + 1, j + 1)
+    for y in xrange(width - 2):
+        for x in xrange(height - 2):
+            if ((fww[y][x - 1] > 0 and fww[y][x + 1] < 0) or
+                (fww[y][x - 1] < 0 and fww[y][x + 1] > 0) or
+                (fww[y - 1][x] > 0 and fww[y + 1][x] < 0) or
+                (fww[y - 1][x] < 0 and fww[y + 1][x] > 0) or
+                (fww[y - 1][x + 1] > 0 and fww[y + 1][x + 1] < 0) or
+                (fww[y - 1][x + 1] < 0 and fww[y + 1][x + 1] > 0) or
+                (fww[y - 1][x - 1] > 0 and fww[y - 1][x + 1] < 0) or
+                (fww[y - 1][x - 1] < 0 and fww[y - 1][x + 1] > 0) or
+                (fww[y + 1][x - 1] > 0 and fww[y + 1][x + 1] < 0) or
+                (fww[y - 1][x - 1] < 0 and fww[y + 1][x - 1] > 0) or
+                (fww[y - 1][x - 1] < 0 and fww[y + 1][x + 1] > 0)):
+                    edges[y][x] = 0
 
     return edges
-
-    plt.imshow(edges)
-    plt.gray()
-    plt.show()
 
 
 def canny_edge_detection():
@@ -247,10 +253,11 @@ def canny_edge_detection():
     imshow(fw_canny, cmap=cm.gray)
     plt.show()
 
+
 if __name__ == "__main__":
     # analytical_local_structure()
     # gauss_convolution()
     # separable_gauss_convolution()
-    # gaussian_derivatives()
+    gaussian_derivatives()
     # comparison()
-    canny_edge_detection()
+    # canny_edge_detection()
