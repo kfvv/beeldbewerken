@@ -234,20 +234,18 @@ def canny(F, s):
 def canny_edge_detection():
     F = imread('cameraman.jpg', flatten=True)
     s = 2.0
-    size = s * 3.0
 
     fx = gD(F, s, 1, 0)
     fy = gD(F, s, 0, 1)
 
     fw = np.sqrt(fx ** 2 + fy ** 2)
-    fw_clean = canny(F, 3)
+    fw_canny = canny(F, 3)
 
-    ax = plt.subplot(1, 2, 0)
-    ax.imshow(fw, cmap=plt.cm.gray)
-    ax = plt.subplot(1, 2, 1)
-    ax.imshow(fw_clean, cmap=plt.cm.gray)
+    plt.subplot(1, 2, 0)
+    imshow(fw, cmap=cm.gray)
+    plt.subplot(1, 2, 1)
+    imshow(fw_canny, cmap=cm.gray)
     plt.show()
-
 
 if __name__ == "__main__":
     # analytical_local_structure()
