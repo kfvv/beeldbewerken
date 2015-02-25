@@ -190,12 +190,69 @@ def comparison():
     pass
 
 
-def canny_edge_detector():
-    pass
+def canny(F, s):
+    # derivatives over x and y
+    fx = gD(F, s, 1, 0)
+    fy = gD(F, s, 0, 1)
+    fxx = gD(F, s, 2, 0)
+    fyy = gD(F, s, 0, 2)
+    fxy = gD(F, s, 1, 1)
+
+    # conditions expressed in cartesian coordinates; fw >> 0, fww = 0
+    fw = np.sqrt(fx ** 2 + fy ** 2)
+    fww = fx ** 2 * fxx + 2 * fx * fy * fxy + fy ** 2 * fyy
+
+    edges = np.copy(fw)
+
+    def check_edges(x, y):
+        if ((fww[y][x - 1] > 0 and fww[y][x + 1] < 0) or
+            (fww[y][x - 1] < 0 and fww[y][x + 1] > 0) or
+            (fww[y - 1][x] > 0 and fww[y + 1][x] < 0) or
+            (fww[y - 1][x] < 0 and fww[y + 1][x] > 0) or
+            (fww[y - 1][x + 1] > 0 and fww[y + 1][x + 1] < 0) or
+            (fww[y - 1][x + 1] < 0 and fww[y + 1][x + 1] > 0) or
+            (fww[y - 1][x - 1] > 0 and fww[y - 1][x + 1] < 0) or
+            (fww[y - 1][x - 1] < 0 and fww[y - 1][x + 1] > 0) or
+            (fww[y + 1][x - 1] > 0 and fww[y + 1][x + 1] < 0) or
+            (fww[y - 1][x - 1] < 0 and fww[y + 1][x - 1] > 0) or
+            (fww[y - 1][x - 1] < 0 and fww[y + 1][x + 1] > 0)):
+                edges[y][x] = 0
+
+    height, width = F.shape
+
+    for i in range(width - 2):
+        for j in range(height - 2):
+            check_edges(i + 1, j + 1)
+
+    return edges
+
+    plt.imshow(edges)
+    plt.gray()
+    plt.show()
+
+
+def canny_edge_detection():
+    F = imread('cameraman.jpg', flatten=True)
+    s = 2.0
+    size = s * 3.0
+
+    fx = gD(F, s, 1, 0)
+    fy = gD(F, s, 0, 1)
+
+    fw = np.sqrt(fx ** 2 + fy ** 2)
+    fw_clean = canny(F, 3)
+
+    ax = plt.subplot(1, 2, 0)
+    ax.imshow(fw, cmap=plt.cm.gray)
+    ax = plt.subplot(1, 2, 1)
+    ax.imshow(fw_clean, cmap=plt.cm.gray)
+    plt.show()
 
 
 if __name__ == "__main__":
     # analytical_local_structure()
     # gauss_convolution()
     # separable_gauss_convolution()
-    gaussian_derivatives()
+    # gaussian_derivatives()
+    # comparison()
+    canny_edge_detection()
