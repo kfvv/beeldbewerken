@@ -292,9 +292,12 @@ def canny_edge_detection():
 
 
 if __name__ == "__main__":
-    # analytical_local_structure()
+    """
+    remove # to start the corresponding function
+    """
+    analytical_local_structure()
     # gauss_convolution()
     # separable_gauss_convolution()
     # gaussian_derivatives()
     # comparison()
-    canny_edge_detection()
+    # canny_edge_detection()
