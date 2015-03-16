@@ -43,7 +43,7 @@ def avarage_error(ai, xy):
 
 
 def drawCube(P, X, Y, Z):
-    corners = np.array([[X,     Y,     Z],
+    vertices = np.array([[X,     Y,     Z],
                         [X + 1, Y,     Z],
                         [X,     Y + 1, Z],
                         [X + 1, Y + 1, Z],
@@ -51,7 +51,7 @@ def drawCube(P, X, Y, Z):
                         [X + 1, Y,     Z - 1],
                         [X,     Y + 1, Z - 1],
                         [X + 1, Y + 1, Z - 1]])
-    print(corners.shape)
+    print(vertices.shape)
 
 # matrix containing image coordinates in 2D on the checkerboard.
 xy = array([[213.1027,  170.0499], [258.1908,  181.3219],
@@ -71,7 +71,8 @@ XYZ = array([[0, -5, 5], [0, -3, 5], [0, -1, 5], [-1, 0, 5],
             [0, -5, 1], [0, -3, 1], [0, -1, 1], [-1, 0, 1],
             [-3, 0, 1], [-5, 0, 1]])
 
-
+# print matrix P
+P = calibration(XYZ, xy)
 image = imread('images/calibrationpoints.jpg')
 imshow(image)
 
