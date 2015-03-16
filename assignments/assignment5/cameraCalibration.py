@@ -20,7 +20,6 @@ def calibration(XYZ, xy):
     p = V[-1]
 
     P = p.reshape(3, 4)
-    print(p)
 
     return P
 
@@ -43,14 +42,14 @@ def avarage_error(ai, xy):
 
 
 def drawCube(P, X, Y, Z):
-    vertices = np.array([[X,     Y,     Z],
-                         [X + 1, Y,     Z],
-                         [X,     Y + 1, Z],
-                         [X + 1, Y + 1, Z],
+    vertices = np.array([[X,     Y - 1, Z - 1],
                          [X,     Y,     Z - 1],
-                         [X + 1, Y,     Z - 1],
-                         [X,     Y + 1, Z - 1],
-                         [X + 1, Y + 1, Z - 1]])
+                         [X - 1, Y,     Z - 1],
+                         [X - 1, Y - 1, Z - 1],
+                         [X,     Y - 1, Z],
+                         [X,     Y,     Z],
+                         [X,     Y - 1, Z],
+                         [X - 1, Y,     Z]])
 
     print(vertices.shape)
 
@@ -67,13 +66,14 @@ xy = array([[213.1027,  170.0499], [258.1908,  181.3219],
 print(xy.shape)
 # corresponding points in 3D
 XYZ = array([[0, -5, 5], [0, -3, 5], [0, -1, 5], [-1, 0, 5],
-             [-3, 0, 5], [-5, 0, 5], [0, -5, 3], [0, -3, 3],
-             [0, -1, 3], [-1, 0, 3], [-3, 0, 3], [-5, 0, 3],
-             [0, -5, 1], [0, -3, 1], [0, -1, 1], [-1, 0, 1],
-             [-3, 0, 1], [-5, 0, 1]])
+            [-3, 0, 5], [-5, 0, 5], [0, -5, 3], [0, -3, 3],
+            [0, -1, 3], [-1, 0, 3], [-3, 0, 3], [-5, 0, 3],
+            [0, -5, 1], [0, -3, 1], [0, -1, 1], [-1, 0, 1],
+            [-3, 0, 1], [-5, 0, 1]])
 print(XYZ.shape)
 # print matrix P
 P = calibration(XYZ, xy)
+print(P)
 image = imread('images/calibrationpoints.jpg')
 imshow(image)
 
