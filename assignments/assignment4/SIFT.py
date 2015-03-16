@@ -7,7 +7,7 @@ the newest version has it too, but the version installed doesn't....
 
 Therefore this file contains a wrapper class for the factory functions
 
-Everything is done with default parameters.  
+Everything is done with default parameters.
 We also give a matching function (it appears that the interface to the C++ still
 needs some work...
 
@@ -39,7 +39,7 @@ class SIFT:
         return kpts, descrs
 
 
-def filter_matches(kp1, kp2, matches, ratio = 0.9):
+def filter_matches(kp1, kp2, matches, ratio=0.9):
     mkp1, mkp2 = [], []
     for m in matches:
         if len(m) == 2 and m[0].distance < m[1].distance * ratio:
@@ -48,12 +48,16 @@ def filter_matches(kp1, kp2, matches, ratio = 0.9):
             mkp2.append( kp2[m.trainIdx] )
     p1 = np.float32([kp.pt for kp in mkp1])
     p2 = np.float32([kp.pt for kp in mkp2])
-    kp_pairs = zip(mkp1, mkp2)
+
+    kp_pairs = zip(p1, p2)
+
     return p1, p2, kp_pairs
+
 
 def matchDescriptors(kp1, d1, kp2, d2):
     #matcher = cv2.BFMatcher(cv2.NORM_L2) # oops not in the pythonxy opencv
     matcher = cv2.DescriptorMatcher_create('BruteForce')
     raw_matches = matcher.knnMatch(d1[1], trainDescriptors = d2[1], k = 2)
     p1, p2, kp_matches = filter_matches(kp1,kp2,raw_matches)
+
     return p1, p2, kp_matches
