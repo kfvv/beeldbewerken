@@ -7,13 +7,12 @@
 from pylab import zeros, svd, imread, imshow, show, axis
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 
 
 def calibration(XYZ, xy):
     """
     Find null vector of matrix A, next use SVD and reshape into matrix with the
-    correst shape.
+    correct shape.
     """
     matA = zeros((len(XYZ) * 2, 12))
 
@@ -51,7 +50,7 @@ def calc_3d(P, XYZ):
 
 def average_error(P, XYZ, xy):
     """
-    Reprojection distance: sqrt((xi - ai)^2 + (yi - bi)^2), used to calculate
+    Reprojection distance: used to calculate
     the reprojection error as the avarage of the Euclidean distance.
     """
     # calc first point
@@ -95,9 +94,9 @@ def drawCube(P, X, Y, Z):
                                 [X + 1, Y,     Z]])
 
     vertices_top = np.array([[X,     Y,     Z + 1],
-                            [X,     Y + 1, Z + 1],
-                            [X + 1, Y + 1, Z + 1],
-                            [X + 1, Y,     Z + 1]])
+                             [X,     Y + 1, Z + 1],
+                             [X + 1, Y + 1, Z + 1],
+                             [X + 1, Y,     Z + 1]])
 
     vertices_x = calc_3d(P, vertices_bottom)
     vertices_y = calc_3d(P, vertices_top)
@@ -107,15 +106,21 @@ def drawCube(P, X, Y, Z):
 
     connected_vertices = zip(vertices_x, vertices_y)
 
-    return connectPlaines(connected_vertices)
+    connectPlaines(connected_vertices)
 
 
 def movingCube(P, image):
-    """Draw a 3D cube that moves along the checkerboard"""
-    for i in range(0, 7):
-        imshow(image)
-        cube = drawCube(P, -i, 0, 0)
+    """Draw and animate a 3D cube that moves along the checkerboard"""
+    for i in range(1, 9):
+        plt.imshow(image)
+        drawCube(P, Z=0, X=-i, Y=0)
         plt.pause(0.001)
+
+    for i in range(1, 9):
+        plt.imshow(image)
+        drawCube(P, Z=0, X=0, Y=-i)
+        plt.pause(0.001)
+
     plt.show(block=True)
 
 
@@ -140,9 +145,11 @@ if __name__ == "__main__":
 
     # print matrix P
     P = calibration(XYZ, xy)
+    print(P)
     drawCube(P, 0, 0, 0)
 
-    print('Average error is: ', average_error(P, XYZ, xy))
+    print('Error is: ', average_error(P, XYZ, xy))
+    print('Average error is: ', average_error(P, XYZ, xy) / 18)
     print(P)
     image = imread('images/calibrationpoints.jpg')
 
