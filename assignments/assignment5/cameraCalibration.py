@@ -1,12 +1,19 @@
+# Student:     Kasper van Veen & Wessel Huising
+# Stdnr:       6139752 & 10011277
+# Course:      Beeldbewerken
+# Date:        18/03/15
+# Assignment:  5: Camera Calibration
+
 from pylab import zeros, svd, imread, imshow, show, axis
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 
 def calibration(XYZ, xy):
     """
-    find null vector of matrix A, next use SVD and reshape into matrix with the
-    correst shape
+    Find null vector of matrix A, next use SVD and reshape into matrix with the
+    correst shape.
     """
     matA = zeros((len(XYZ) * 2, 12))
 
@@ -24,7 +31,7 @@ def calibration(XYZ, xy):
 
 
 def calc_3d(P, XYZ):
-    """calculate 2D points from 3D"""
+    """Calculate 2D points from 3D"""
 
     # calc first point
     result = np.append(XYZ[0], 1)
@@ -44,8 +51,8 @@ def calc_3d(P, XYZ):
 
 def average_error(P, XYZ, xy):
     """
-    reprojection distance: sqrt((xi - ai)^2 + (yi - bi)^2), used to calculate
-    the reprojection error as the avarage of the Euclidean distance
+    Reprojection distance: sqrt((xi - ai)^2 + (yi - bi)^2), used to calculate
+    the reprojection error as the avarage of the Euclidean distance.
     """
     # calc first point
     result = calc_3d(P, XYZ)
@@ -54,6 +61,7 @@ def average_error(P, XYZ, xy):
 
 
 def drawLines(vertices, color='b'):
+    """Draw lines for the top- and bottom plain."""
     x_values = vertices[:, 0]
     y_values = vertices[:, 1]
 
@@ -66,6 +74,10 @@ def drawLines(vertices, color='b'):
 
 
 def connectPlaines(vertices, color='b'):
+    """
+    Connect the top- and bottom plains with each other by drawing lines between
+    them.
+    """
     for vertex in vertices:
         top = vertex[1]
         bottom = vertex[0]
@@ -75,7 +87,7 @@ def connectPlaines(vertices, color='b'):
 def drawCube(P, X, Y, Z):
     """
     Use the dot product between P and the homogeneous representation of the 3D
-    calibration to get the euclidean norm
+    calibration to get the euclidean norm.
     """
     vertices_bottom = np.array([[X,     Y,     Z],
                                 [X,     Y + 1, Z],
@@ -95,7 +107,16 @@ def drawCube(P, X, Y, Z):
 
     connected_vertices = zip(vertices_x, vertices_y)
 
-    connectPlaines(connected_vertices)
+    return connectPlaines(connected_vertices)
+
+
+def movingCube(P, image):
+    """Draw a 3D cube that moves along the checkerboard"""
+    for i in range(0, 7):
+        imshow(image)
+        cube = drawCube(P, -i, 0, 0)
+        plt.pause(0.001)
+    plt.show(block=True)
 
 
 if __name__ == "__main__":
@@ -109,21 +130,23 @@ if __name__ == "__main__":
                    [234.3943,  263.9834], [276.9775,  277.1341],
                    [323.318,   291.5372], [363.3963,  282.1438],
                    [392.8288,  251.4589], [419.1301,  223.9051]])
-    print(xy.shape)
+
     # corresponding points in 3D
     XYZ = np.array([[0, -5, 5], [0, -3, 5], [0, -1, 5], [-1, 0, 5],
                     [-3, 0, 5], [-5, 0, 5], [0, -5, 3], [0, -3, 3],
                     [0, -1, 3], [-1, 0, 3], [-3, 0, 3], [-5, 0, 3],
                     [0, -5, 1], [0, -3, 1], [0, -1, 1], [-1, 0, 1],
                     [-3, 0, 1], [-5, 0, 1]])
-    print(XYZ.shape)
+
     # print matrix P
     P = calibration(XYZ, xy)
     drawCube(P, 0, 0, 0)
 
-    print(average_error(P, XYZ, xy))
+    print('Average error is: ', average_error(P, XYZ, xy))
     print(P)
     image = imread('images/calibrationpoints.jpg')
+
+    # movingCube(P, image)
     imshow(image)
 
     plt.plot(xy[:, 0], xy[:, 1], 'd')
